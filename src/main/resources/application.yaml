@@ -2,9 +2,9 @@ spring:
   application:
     name: tasker
   datasource:
-    url: jdbc:postgresql://localhost:5432/tasks
-    username: admin
-    password: admin
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     show-sql: true
