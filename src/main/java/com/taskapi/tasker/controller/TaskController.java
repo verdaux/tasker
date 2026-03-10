@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.taskapi.tasker.dto.CreateTaskRequest;
+import com.taskapi.tasker.dto.TaskResponse;
 import com.taskapi.tasker.entity.Task;
 import com.taskapi.tasker.service.TaskService;
 
@@ -20,14 +22,13 @@ public class TaskController {
     public TaskController(TaskService service) {
         this.service = service;
     }
-
-    @GetMapping
-    public List<Task> getTasks() {
-        return service.getAllTasks();
+    @PostMapping
+    public TaskResponse createTask(@RequestBody CreateTaskRequest request) {
+        return service.createTask(request);
     }
 
-    @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return service.createTask(task);
+    @GetMapping
+    public List<TaskResponse> getTasks() {
+        return service.getAllTasks();
     }
 }
