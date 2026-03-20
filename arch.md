@@ -16,7 +16,7 @@ tasker/
 
 │   ├── main/ 
 
-│   │   ├── java/com/cognizant/tasker/ 
+│   │   ├── java/com/taskapi/tasker/ 
 
 │   │   │   ├── TaskerApplication.java 
 
@@ -108,7 +108,7 @@ tasker/
 
 │   └── test/ 
 
-│       └── java/com/cognizant/tasker/ 
+│       └── java/com/taskapi/tasker/ 
 
 │           ├── task/ 
 

@@ -1,0 +1,255 @@
+name: Tasker CI/CD 
+
+ 
+
+on: 
+
+  push: 
+
+    branches: [ master, develop ] 
+
+  pull_request: 
+
+    branches: [ master ] 
+
+ 
+
+env: 
+
+  REGISTRY: ghcr.io 
+
+  IMAGE_NAME: ${{ github.repository }}/tasker 
+
+ 
+
+jobs: 
+
+ 
+
+  # ── 1. Build & test ──────────────────────────────────────────────────────── 
+
+  build-and-test: 
+
+    runs-on: ubuntu-latest 
+
+ 
+
+    services: 
+
+      postgres: 
+
+        image: postgres:17-alpine 
+
+        env: 
+
+          POSTGRES_DB:       taskerdb_test 
+
+          POSTGRES_USER:     tasker 
+
+          POSTGRES_PASSWORD: tasker 
+
+        ports: 
+
+          - 5432:5432 
+
+        options: >- 
+
+          --health-cmd pg_isready 
+
+          --health-interval 10s 
+
+          --health-retries 5 
+
+ 
+
+      mongo: 
+
+        image: mongo:8-jammy 
+
+        ports: 
+
+          - 27017:27017 
+
+ 
+
+    steps: 
+
+      - uses: actions/checkout@v4 
+
+ 
+
+      - name: Set up Java 25 
+
+        uses: actions/setup-java@v4 
+
+        with: 
+
+          java-version: '25'          # bump to latest LTS freely 
+
+          distribution: 'temurin' 
+
+          cache: maven 
+
+ 
+
+      - name: Build and run tests 
+
+        env: 
+
+          POSTGRES_HOST: localhost 
+
+          POSTGRES_DB:   taskerdb_test 
+
+          POSTGRES_USER: tasker 
+
+          POSTGRES_PASSWORD: tasker 
+
+          MONGO_HOST:    localhost 
+
+          MONGO_DB:      tasker_audit_test 
+
+          JWT_SECRET:    ci-test-secret-32-characters-long 
+
+        run: mvn --batch-mode verify 
+
+ 
+
+      - name: Publish test results 
+
+        uses: dorny/test-reporter@v1 
+
+        if: always() 
+
+        with: 
+
+          name: Maven Tests 
+
+          path: target/surefire-reports/*.xml 
+
+          reporter: java-junit 
+
+ 
+
+      - name: Upload coverage to Codecov 
+
+        uses: codecov/codecov-action@v4 
+
+        with: 
+
+          token: ${{ secrets.CODECOV_TOKEN }} 
+
+ 
+
+  # ── 2. Build & push Docker image (main branch only) ─────────────────────── 
+
+  docker-publish: 
+
+    needs: build-and-test 
+
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' 
+
+    runs-on: ubuntu-latest 
+
+ 
+
+    permissions: 
+
+      contents: read 
+
+      packages: write 
+
+ 
+
+    steps: 
+
+      - uses: actions/checkout@v4 
+
+ 
+
+      - name: Log in to GitHub Container Registry 
+
+        uses: docker/login-action@v3 
+
+        with: 
+
+          registry: ${{ env.REGISTRY }} 
+
+          username: ${{ github.actor }} 
+
+          password: ${{ secrets.GITHUB_TOKEN }} 
+
+ 
+
+      - name: Extract Docker metadata (tags, labels) 
+
+        id: meta 
+
+        uses: docker/metadata-action@v5 
+
+        with: 
+
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} 
+
+          tags: | 
+
+            type=sha,prefix=sha- 
+
+            type=raw,value=latest,enable={{is_default_branch}} 
+
+            type=semver,pattern={{version}} 
+
+ 
+
+      - name: Set up Docker Buildx 
+
+        uses: docker/setup-buildx-action@v3 
+
+ 
+
+      - name: Build and push image 
+
+        uses: docker/build-push-action@v5 
+
+        with: 
+
+          context: . 
+
+          push: true 
+
+          tags: ${{ steps.meta.outputs.tags }} 
+
+          labels: ${{ steps.meta.outputs.labels }} 
+
+          cache-from: type=gha 
+
+          cache-to: type=gha,mode=max 
+
+ 
+
+  # ── 3. Deploy (placeholder — wire to your other environment) ────────── 
+
+  deploy: 
+
+    needs: docker-publish 
+
+    if: github.ref == 'refs/heads/main' 
+
+    runs-on: ubuntu-latest 
+
+    environment: production 
+
+ 
+
+    steps: 
+
+      - name: Deploy to target environment 
+
+        run: | 
+
+          echo "Add your deployment step here:" 
+
+          echo "  - kubectl set image deployment/tasker ..." 
+
+          echo "  - SSH + docker pull + docker-compose up -d" 
+
+          echo "  - Helm upgrade ..." 

@@ -1,0 +1,111 @@
+type Query { 
+
+    tasks: [Task!]! 
+
+    task(id: ID!): Task 
+
+    myTasks: [Task!]! 
+
+} 
+
+ 
+
+type Mutation { 
+
+    createTask(input: CreateTaskInput!): Task! 
+
+    updateTask(id: ID!, input: UpdateTaskInput!): Task! 
+
+    deleteTask(id: ID!): Boolean! 
+
+    updateTaskStatus(id: ID!, status: TaskStatus!): Task! 
+
+} 
+
+ 
+
+type Task { 
+
+    id: ID! 
+
+    title: String! 
+
+    description: String 
+
+    status: TaskStatus! 
+
+    priority: TaskPriority! 
+
+    dueDate: String 
+
+    createdAt: String! 
+
+    updatedAt: String! 
+
+    owner: User! 
+
+} 
+
+ 
+
+type User { 
+
+    id: ID! 
+
+    username: String! 
+
+    email: String! 
+
+} 
+
+ 
+
+input CreateTaskInput { 
+
+    title: String! 
+
+    description: String 
+
+    priority: TaskPriority = MEDIUM 
+
+    dueDate: String 
+
+} 
+
+ 
+
+input UpdateTaskInput { 
+
+    title: String 
+
+    description: String 
+
+    priority: TaskPriority 
+
+    dueDate: String 
+
+} 
+
+ 
+
+enum TaskStatus { 
+
+    TODO 
+
+    IN_PROGRESS 
+
+    DONE 
+
+} 
+
+ 
+
+enum TaskPriority { 
+
+    LOW 
+
+    MEDIUM 
+
+    HIGH 
+
+} 

@@ -1,34 +1,75 @@
-services:
+version: "3.9" 
 
-  postgres:
-    image: postgres:16
-    container_name: task-postgres
-    environment:
-      POSTGRES_DB: tasks
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+ 
 
-  task-api:
-    build: .
-    container_name: task-api
-    depends_on:
-      postgres:
-        condition: service_healthy
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/tasks
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin
-    ports:
-      - "8080:8080"
+services: 
 
-volumes:
-  postgres_data:
+ 
+
+  postgres: 
+
+    image: postgres:17-alpine 
+
+    container_name: tasker-postgres 
+
+    environment: 
+
+      POSTGRES_DB:       taskerdb 
+
+      POSTGRES_USER:     tasker 
+
+      POSTGRES_PASSWORD: tasker 
+
+    ports: 
+
+      - "5432:5432" 
+
+    volumes: 
+
+      - postgres_data:/var/lib/postgresql/data 
+
+      - ./docker/init-db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro 
+
+    healthcheck: 
+
+      test: ["CMD", "pg_isready", "-U", "tasker"] 
+
+      interval: 10s 
+
+      timeout: 5s 
+
+      retries: 5 
+
+ 
+
+  mongo: 
+
+    image: mongo:8.0 
+
+    container_name: tasker-mongo 
+
+    ports: 
+
+      - "27017:27017" 
+
+    volumes: 
+
+      - mongo_data:/data/db 
+
+    healthcheck: 
+
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"] 
+
+      interval: 10s 
+
+      timeout: 5s 
+
+      retries: 5 
+
+ 
+
+volumes: 
+
+  postgres_data: 
+
+  mongo_data: 

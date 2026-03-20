@@ -22,13 +22,11 @@ public class TaskController {
     public TaskController(TaskService service) {
         this.service = service;
     }
-    @PostMapping
-    public TaskResponse createTask(@RequestBody CreateTaskRequest request) {
-        return service.createTask(request);
-    }
-
-    @GetMapping
-    public List<TaskResponse> getTasks() {
-        return service.getAllTasks();
-    }
+	/*
+	 * @PostMapping public TaskResponse createTask(@RequestBody CreateTaskRequest
+	 * request) { return service.createTask(request); }
+	 * 
+	 * @GetMapping public List<TaskResponse> getTasks() { return
+	 * service.getAllTasks(); }
+	 */
 }
