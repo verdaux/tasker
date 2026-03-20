@@ -98,54 +98,290 @@ Additional Components:
  │ Configuration (CORS, Jackson, etc.)    │
  └─────────────────────────────────────────┘
 
+---
+
+## Tasker — End-to-End Test Guide 
+
+Base URL: http://localhost:8080 
+
+ 
+ 
+
+### 1. Health Check 
+
+**curl** 
+```bash
+curl http://localhost:8080/actuator/health 
+ ```
+
+**Postman** 
+
+Method: GET 
+
+URL: http://localhost:8080/actuator/health 
+
+Expected 
+```json
+{ "status": "UP" } 
+ ```
+
+ 
+ 
+
+### 2. Register a User 
+
+**curl** 
+```bash
+curl -X POST http://localhost:8080/api/auth/register \ 
+  -H "Content-Type: application/json" \ 
+  -d '{"username":"testuser","email":"test@example.com","password":"password123"}' 
+ ```
+
+**Postman** 
+
+Method: POST 
+
+URL: http://localhost:8080/api/auth/register 
+
+Body → raw → JSON: 
+```json
+{ 
+  "username": "testuser", 
+  "email": "test@example.com", 
+  "password": "password123" 
+} 
+```
+
+Expected 
+```json
+{ 
+  "token": "eyJhbGciOiJIUzI1NiJ9...", 
+  "username": "testuser", 
+  "email": "test@example.com" 
+} 
+``` 
+
+Copy the token value — you'll need it for all subsequent requests. 
+
+ 
+ 
+
+### 3. Login 
+
+**curl**
+```bash
+curl -X POST http://localhost:8080/api/auth/login \ 
+  -H "Content-Type: application/json" \ 
+  -d '{"username":"testuser","password":"password123"}' 
+``` 
+
+**Postman** 
+
+Method: POST 
+
+URL: http://localhost:8080/api/auth/login 
+
+Body → raw → JSON: 
+```json
+{ 
+  "username": "testuser", 
+  "password": "password123" 
+} 
+``` 
+
+Expected: same response shape as register with a fresh token. 
+
+ 
+ 
+
+### 4. Set the Auth Token 
+
+All GraphQL requests below require the JWT in the Authorization header. 
+```bash
+curl — export it once as a shell variable: 
+
+export TOKEN="eyJhbGciOiJIUzI1NiJ9..."   # paste your token here 
+ ```
+
+Then every curl command below uses -H "Authorization: Bearer $TOKEN". 
+
+**Postman** — two options: 
+
+Option A (per-request): In each request go to Authorization tab → Type: Bearer Token → paste the token. 
+
+Option B (collection-level, recommended): 
+
+Create a collection called Tasker 
+
+Collection → Edit → Authorization tab → Type: Bearer Token → paste token 
+
+Each request inside inherits it automatically 
+
+ 
+ 
+
+### 5. GraphQL — Create a Task 
+
+**curl** 
+```bash
+curl -X POST http://localhost:8080/graphql \ 
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Bearer $TOKEN" \ 
+  -d '{ 
+    "query": "mutation { createTask(input: { title: \"Buy groceries\", description: \"Milk, eggs, bread\", priority: HIGH }) { id title status priority } }" 
+  }' 
+ ```
+
+**Postman** 
+
+Method: POST 
+
+URL: http://localhost:8080/graphql 
+
+Body → raw → JSON: 
+```json
+{ 
+  "query": "mutation { createTask(input: { title: \"Buy groceries\", description: \"Milk, eggs, bread\", priority: HIGH }) { id title status priority } }" 
+} 
+``` 
+
+Expected 
+```json
+{ 
+  "data": { 
+    "createTask": { 
+      "id": "uuid-here", 
+      "title": "Buy groceries", 
+      "status": "TODO", 
+      "priority": "HIGH" 
+    } 
+  } 
+} 
+``` 
+
+Copy the id — needed for update/delete below. 
+
+ 
+ 
+
+### 6. GraphQL — Get My Tasks 
+
+**curl**
+```bash
+curl -X POST http://localhost:8080/graphql \ 
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Bearer $TOKEN" \ 
+  -d '{"query": "query { myTasks { id title status priority dueDate } }"}' 
+ ```
+
+**Postman** — same setup, body: 
+```json
+{ 
+  "query": "query { myTasks { id title status priority dueDate } }" 
+} 
+ ```
+
+ 
+ 
+
+### 7. GraphQL — Update Task Status 
+```bash
+curl -X POST http://localhost:8080/graphql \ 
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Bearer $TOKEN" \ 
+  -d '{ 
+    "query": "mutation { updateTaskStatus(id: \"PASTE_TASK_ID\", status: IN_PROGRESS) { id title status } }" 
+  }' 
+ ```
+
+Expected 
+```json
+{ 
+  "data": { 
+    "updateTaskStatus": { 
+      "id": "...", 
+      "title": "Buy groceries", 
+      "status": "IN_PROGRESS" 
+    } 
+  } 
+} 
+``` 
+
+ 
+ 
+
+### 8. GraphQL — Update Task Details 
+```bash
+curl -X POST http://localhost:8080/graphql \ 
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Bearer $TOKEN" \ 
+  -d '{ 
+    "query": "mutation { updateTask(id: \"PASTE_TASK_ID\", input: { title: \"Buy groceries & snacks\", priority: MEDIUM }) { id title priority } }" 
+  }' 
+ ```
+
+ 
+ 
+
+### 9. GraphQL — Delete a Task 
+
+curl -X POST http://localhost:8080/graphql \ 
+  -H "Content-Type: application/json" \ 
+  -H "Authorization: Bearer $TOKEN" \ 
+  -d '{ 
+    "query": "mutation { deleteTask(id: \"PASTE_TASK_ID\") }" 
+  }' 
+ 
+
+Expected 
+```json
+{ "data": { "deleteTask": true } } 
+``` 
+
+ 
+ 
+
+### 10. Postman — GraphQL Mode (cleaner alternative) 
+
+Postman has a native GraphQL mode that gives you schema introspection and autocomplete: 
+
+New Request → change type to GraphQL 
+
+URL: http://localhost:8080/graphql 
+
+Authorization tab → Bearer Token → paste token 
+
+Click Schema → Fetch from URL → it auto-loads your schema 
+
+Write queries in the Query editor with full autocomplete 
+
+ 
+ 
+
+### 11. Verify Audit Logs in MongoDB 
+
+docker exec -it tasker-mongo mongosh tasker_audit \ 
+  --eval "db.audit_logs.find().pretty()" 
+ 
+
+Every create/update/delete should have written a document here. 
+
+ 
+ | Step | Endpoint                         | Method        |
+|------|----------------------------------|--------------|
+| 1    | /actuator/health                | GET          |
+| 2    | /api/auth/register              | POST         |
+| 3    | /api/auth/login                 | POST         |
+| 4    | /graphql — createTask           | POST         |
+| 5    | /graphql — myTasks              | POST         |
+| 6    | /graphql — updateTaskStatus     | POST         |
+| 7    | /graphql — updateTask           | POST         |
+| 8    | /graphql — deleteTask           | POST         |
+| 9    | MongoDB audit check             | docker exec  |
+
 
 
 ---
-
-## Example Usage
-
-### Create a Task (POST)
-
-**Endpoint:**
-
-POST /tasks
-
-**Body:**
-```json
-{
-  "title": "Fix login bug",
-  "description": "Users cannot log in using Google OAuth",
-  "status": "OPEN"
-}
-```
-Response:
-```json
-{
-  "id": "c5c9f9d6-b8a7-4e9e-8c9c-9d3e6f3f2b0e",
-  "title": "Fix login bug",
-  "description": "Users cannot log in using Google OAuth",
-  "status": "OPEN",
-  "createdAt": "2026-03-10T18:10:22Z"
-}
-```
-Get All Tasks (GET)
-Endpoint:
-
-GET /tasks
-
-Response:
-
-```json
-[
-  {
-    "id": "c5c9f9d6-b8a7-4e9e-8c9c-9d3e6f3f2b0e",
-    "title": "Fix login bug",
-    "description": "Users cannot log in using Google OAuth",
-    "status": "OPEN",
-    "createdAt": "2026-03-10T18:10:22Z"
-  }
-]
-```
 
 Getting Started
 1. Clone the repository:
