@@ -32,7 +32,7 @@ services:
 
     healthcheck: 
 
-      test: ["CMD", "pg_isready", "-U", "tasker"] 
+      test: ["CMD", "pg_isready", "-U", "tasker", "-d", "taskerdb"] 
 
       interval: 10s 
 
@@ -61,6 +61,60 @@ services:
       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"] 
 
       interval: 10s 
+
+      timeout: 5s 
+
+      retries: 5 
+
+ 
+
+  app: 
+
+    build: 
+
+      context: . 
+
+      dockerfile: Dockerfile 
+
+    container_name: tasker-app 
+
+    depends_on: 
+
+      postgres: 
+
+        condition: service_healthy 
+
+      mongo: 
+
+        condition: service_healthy 
+
+    environment: 
+
+      SPRING_PROFILES_ACTIVE: docker 
+
+      POSTGRES_HOST:          postgres 
+
+      POSTGRES_DB:            taskerdb 
+
+      POSTGRES_USER:          tasker 
+
+      POSTGRES_PASSWORD:      tasker 
+
+      MONGO_HOST:             mongo 
+
+      MONGO_DB:               tasker_audit 
+
+      JWT_SECRET:             local-prod-secret-32-characters-ok 
+
+    ports: 
+
+      - "8080:8080" 
+
+    healthcheck: 
+
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"] 
+
+      interval: 15s 
 
       timeout: 5s 
 

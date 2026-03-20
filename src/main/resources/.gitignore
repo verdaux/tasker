@@ -1,1 +1,6 @@
+target/ 
+*.class 
 /application-dev.yml
+.env 
+*.jar 
+!**/src/main/**/*.jar 
