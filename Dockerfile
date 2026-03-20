@@ -1,10 +1,11 @@
 # Stage 1: build 
 
-FROM eclipse-temurin:25-jdk-alpine AS builder
+FROM maven:3.9.14-eclipse-temurin:25-jdk-alpine AS builder
 WORKDIR /workspace
 
 COPY pom.xml .
 COPY src ./src
+RUN mvn clean install
 
 # Download dependencies separately so Docker can cache this layer 
 RUN --mount=type=cache,target=/root/.m2 \ 
