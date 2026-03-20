@@ -10,7 +10,7 @@ spring:
   jpa:
       show-sql: true
       hibernate:
-        ddl-auto: validate # Flyway owns the schema — never use create/update 
+        ddl-auto: update # Flyway owns the schema — never use create/update 
       properties:
         hibernate:
           format_sql: true

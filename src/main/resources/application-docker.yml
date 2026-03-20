@@ -1,0 +1,28 @@
+spring: 
+
+  datasource: 
+
+    url:      jdbc:postgresql://${POSTGRES_HOST:postgres}:5432/${POSTGRES_DB:taskerdb} 
+
+    username: ${POSTGRES_USER:tasker} 
+
+    password: ${POSTGRES_PASSWORD:tasker} 
+
+
+  graphql: 
+
+    graphiql: 
+
+      enabled: false 
+  mongodb:
+    uri: mongodb://${MONGO_HOST:mongo}:27017/${MONGO_DB:tasker_audit}
+
+ 
+
+app: 
+
+  jwt: 
+
+    secret:    ${JWT_SECRET:default-local-secret-change-in-prod-32c} 
+
+    expiry-ms: ${JWT_EXPIRY_MS:86400000} 

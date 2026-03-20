@@ -96,19 +96,19 @@ jobs:
 
         env: 
 
-          POSTGRES_HOST: localhost 
+          POSTGRES_HOST:     localhost 
 
-          POSTGRES_DB:   taskerdb_test 
+          POSTGRES_DB:       taskerdb_test 
 
-          POSTGRES_USER: tasker 
+          POSTGRES_USER:     tasker 
 
-          POSTGRES_PASSWORD: tasker 
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }} 
 
-          MONGO_HOST:    localhost 
+          MONGO_HOST:        localhost 
 
-          MONGO_DB:      tasker_audit_test 
+          MONGO_DB:          tasker_audit_test 
 
-          JWT_SECRET:    ci-test-secret-32-characters-long 
+          JWT_SECRET:        ${{ secrets.JWT_SECRET }} 
 
         run: mvn --batch-mode verify 
 
@@ -226,7 +226,7 @@ jobs:
 
  
 
-  # ── 3. Deploy (placeholder — wire to your other environment) ────────── 
+  # ── 3. Deploy (placeholder — wire to your Cognizant environment) ────────── 
 
   deploy: 
 
