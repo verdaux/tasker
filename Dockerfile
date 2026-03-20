@@ -1,6 +1,6 @@
 # Stage 1: build 
-
-FROM maven:3.9.6-eclipse-temurin:25-jdk-alpine AS builder
+ARG MAVEN_TAG=3.9.6-eclipse-temurin-25-jdk-alpine
+FROM maven:${MAVEN_TAG} AS builder
 WORKDIR /workspace
 
 COPY pom.xml .
