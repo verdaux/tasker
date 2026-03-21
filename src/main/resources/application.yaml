@@ -23,7 +23,7 @@ spring:
       whitelabel:
         enabled: false
   mongodb:
-    uri: mongodb://${MONGO_HOST:localhost}:27017/${MONGO_DB:tasker_audit}
+    uri: ${MONGO_URI}
   graphql: 
     graphiql: 
       enabled: true                # Disable in production 
