@@ -65,21 +65,8 @@
 		</dependency>
 		<!-- ── MongoDB ──────────────────────────────────────────────── -->
 		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-data-mongodb</artifactId>
-		    <version>4.0.4</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.mongodb</groupId>
-		    <artifactId>mongodb-driver-sync</artifactId>
-		    <version>4.10.2</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.mongodb</groupId>
-		    <artifactId>mongodb-driver-core</artifactId>
-		    <version>4.10.2</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 		<!-- ── GraphQL ──────────────────────────────────────────────── -->
 		<dependency>
