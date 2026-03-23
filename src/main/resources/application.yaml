@@ -39,6 +39,7 @@ spring:
       path: /graphql
   mongodb:
     uri: mongodb+srv://tasker_user:a2RgHJWz7b3C68PC@task.kzvmvis.mongodb.net/tasker_audit?retryWrites=true&w=majority&appName=Task&authSource=admin
+    database: tasker_audit
 
 
 # ───────────────────────────────────────────────────────────────────────────── 
