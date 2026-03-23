@@ -62,4 +62,6 @@ management:
       exposure: 
         include: health, info, metrics
 
-
+logging:
+  level:
+    org.springframework.data.mongodb.core.MongoTemplate: DEBUG
